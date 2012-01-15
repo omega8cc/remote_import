@@ -131,13 +131,12 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
   /**
    * Implementation of service verify.
    */
-  function verify() {
-    parent::verify();
-    if ($this->context->type == 'server') {
-      // Create the configuration file directory.
-      provision_file()->create_dir($this->server->remote_import_config_path, dt("Example configuration"), 0700);
-      // Sync the directory to the remote server if needed.
-      $this->sync($this->server->remote_import_config_path);
+  function verify_server_cmd() {
+    parent::verify_server_cmd();
+    // We should try to connect to the remote hostmaster server.
+    $result = $this->remote_execute('@hostmaster status');
+    if (!isset($result['object']['Drupal bootstrap']) || ($result['object']['Drupal bootstrap'] != 'Successful')) {
+      return drush_set_error('REMOTE_SERVER_IS_NOT_MASTER', dt('The specified server is not an Aegir master server.'));
     }
   }
 }

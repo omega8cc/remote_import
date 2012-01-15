@@ -52,8 +52,13 @@ class provisionService_remote_import extends provisionService {
    * We change what we will do based on what the 
    * type of object the command is being run against.
    */
-  function verify() {
-    
+  function verify_server_cmd() {
+    if ($this->context->type == 'server') {
+      // We need to make sure that this is a REMOTE server!
+      if (provision_is_local_host($this->server->remote_host)) {
+        return drush_set_error('REMOTE_SERVER_IS_LOCAL', dt('The specified server is not a remote server.'));
+      }
+    }
   }
   
   function list_sites() {
