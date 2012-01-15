@@ -19,7 +19,7 @@
  * values that are passed to it, and also to override the portions of
  * the public API for this service that are necessary.
  */
-class Provision_Service_remote_import_hostmaster extends Provision_Service_remote_import {
+class provisionService_remote_import_hostmaster extends provisionService_remote_import {
  /**
   * Some common options handled upstream by the base service classes.
   */

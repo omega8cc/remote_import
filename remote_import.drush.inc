@@ -35,7 +35,7 @@ function remote_import_provision_services() {
  * This class should define the 'public API' to be used by the rest
  * of the system, which should not expose implementation details.
  */
-class Provision_Service_remote_import extends Provision_Service {
+class provisionService_remote_import extends provisionService {
   public $service = 'remote_import';
 
   /**
