@@ -69,6 +69,10 @@ class provisionService_remote_import extends provisionService {
     return FALSE;
   }
   
+  function fetch_settings($old_url) {
+    return array();
+  }
+  
   function deploy($backup_file, $old_uri, $new_uri, $platform, $db_server) {
     // Need to create a context for this one.
     $options = array();
@@ -81,7 +85,7 @@ class provisionService_remote_import extends provisionService {
     $options['aliases'] = array();
     $options['redirection'] = 0;
     $options['db_server'] = '@' . $db_server;
-    // @todo: Do we need to set the profile here too?
+    $options += $this->fetch_settings($old_uri);
     
   
     drush_backend_invoke_args('provision-save', array('@' . $new_uri), $options);

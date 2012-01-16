@@ -127,6 +127,43 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
     return FALSE;
   }
   
+  function fetch_settings($old_url) {
+    $settings = array();
+    
+    $lines = array();
+    $lines[] = 'drush_backend_set_result(d()->options)';
+    
+    // Execute the PHP we wrote in $lines on the remote server.
+    $result = $this->remote_execute('@' . $old_url . ' php-eval', array(implode(';', $lines) . ';'));
+    
+    // If the PHP suceeeds, the result will be in the 'object' key.
+    if (isset($result['object']) && is_array($result['object'])) {
+      $remote_settings = $result['object'];
+      // Now copy the settings we need:
+      foreach ($this->remote_settings_to_copy() as $setting) {
+        if (isset($remote_settings[$setting])) {
+          $settings[$setting] = $remote_settings[$setting];
+        }
+      }
+    }
+    
+    return $settings;
+  }
+  
+  function remote_settings_to_copy() {
+    $settings = array(
+      'profile',
+      'language',
+    );
+    // Allow other commands to alter the settings to copy.
+    $modules = drush_command_implements('remote_import_hostmaster_remote_setings_to_copy_alter');
+    foreach ($modules as $name) {
+      $func = "{$name}_remote_import_hostmaster_remote_setings_to_copy_alter";
+      $func($settings);
+    }
+    return $settings;
+  }
+  
 
   /**
    * Implementation of service verify.
