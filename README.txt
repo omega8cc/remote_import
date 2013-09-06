@@ -6,13 +6,13 @@ This Drush extension allows you to fetch remote sites from remote Aegir servers.
 Installation
 ------------
 
-You need to place this extension within the provision directory so that the
-'remote_import' directory is on the same level as the 'provision.service.inc'.
-On the server that you want to import into, you do not need to install anything
-on the server that sites will be copied from.
+Follow the normal procedure for installing a Drush extension on your system.
+Normally, this would mean it should be at /var/aegir/.drush/remote_import.
+You do not need to install anything on the server from which sites will be
+copied.
 
 See also
 --------
 
 You probably want to install the Remote import - Hostmaster project into your
-Aegir frontend.
+Aegir frontend: https://drupal.org/project/hosting_remote_import
