@@ -92,7 +92,7 @@ class Provision_Service_remote_import_hostmaster extends Provision_Service_remot
     $this->fetch($remote_backup_file, $local_file);
 
     // And now delete the backup just fetched.
-    $this->remote_execute('provision-backup_delete', array($remote_backup_file));
+    $this->remote_execute('provision-backup-delete', array($remote_backup_file));
 
     return $local_file;
   }
