@@ -52,7 +52,7 @@ class Provision_Service_remote_import extends Provision_Service {
     $options['db_server'] = '@' . $db_server;
     $options += $this->fetch_settings($old_uri);
 
-    drush_backend_invoke_args('provision-save', array('@' . $new_uri), $options);
+    drush_invoke_process('@self', 'provision-save', array('@' . $new_uri), $options);
 
     provision_backend_invoke($new_uri, 'provision-deploy', array($backup_file), array('old_uri' => $old_uri));
 
