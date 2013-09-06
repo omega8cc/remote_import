@@ -1,5 +1,4 @@
 <?php
- // $Id$
 
  /**
   * @file
@@ -19,7 +18,7 @@
  * values that are passed to it, and also to override the portions of
  * the public API for this service that are necessary.
  */
-class provisionService_remote_import_hostmaster extends provisionService_remote_import {
+class Provision_Service_remote_import_hostmaster extends Provision_Service_remote_import {
  /**
   * Some common options handled upstream by the base service classes.
   */
@@ -46,12 +45,13 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
      */
     $this->server->setProperty('remote_import_field', 'default');
   }
-  
+
   function list_sites() {
     $sites = array();
-    
-    //$result = $this->remote_execute('@hostmaster status', array());
-    
+
+    $result = $this->remote_execute('@hostmaster status', array());
+    drush_print_r($result);
+
     // We talk to the remote Aegir, and get it to list the sites it has.
     // We need to bootstrap the remote hostmaster.
     $lines[] = 'drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)';
@@ -63,79 +63,79 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
     // Set the $sites array into the backend result, so we can extract it easily
     // later.
     $lines[] = 'drush_backend_set_result($sites)';
-    
+
     // Execute the PHP we wrote in $lines on the remote server.
     $result = $this->remote_execute('@hostmaster php-eval', array(implode(';', $lines) . ';'));
-    
+
     // If the PHP suceeeds, the result will be in the 'object' key.
     if (isset($result['object']) && is_array($result['object'])) {
       return $result['object'];
     }
-    
+
     return FALSE;
   }
-  
+
   function remote_execute($command, $data = array()) {
     $data += array(
       'root' => NULL,
       'uri' => NULL,
     );
-    return drush_backend_invoke($command, $data, 'POST', TRUE, NULL, $this->server->remote_host, $this->server->script_user);
+    return drush_invoke_process(array('remote-host' => $this->server->remote_host, 'remote-user' => $this->server->script_user), $command, $data, array(), array('method' => 'POST', 'integrate' => TRUE));
   }
-  
+
   function fetch_site($site) {
     // Do a backup on the remote server.
     $remote_backup_file = $this->remote_backup($site);
-    
+
     // And now fetch that backup.
     $local_file = d('@hostmaster')->platform->server->backup_path . '/' . basename($remote_backup_file);
     $this->fetch($remote_backup_file, $local_file);
-    
+
     // And now delete the backup just fetched.
     $this->remote_execute('provision-backup_delete', array($remote_backup_file));
-    
+
     return $local_file;
   }
-  
+
   function fetch($path, $dest) {
     $options = array(
       'omit-dir-times' => TRUE,
     );
     if (drush_core_call_rsync(escapeshellarg($this->server->script_user . '@' . $this->server->remote_host . ':/') . $path, $dest, $options, TRUE, FALSE)) {
       drush_log(dt('@path has been fetched from remote server @remote_host.', array(
-        '@path' => $path, 
+        '@path' => $path,
         '@remote_host' => $this->server->remote_host))
       );
     }
     else {
       drush_set_error('PROVISION_FILE_SYNC_FAILED', dt('@path could not be fetched from remote server @remote_host.' .
         ' Changes might not be available until this has been done. (error: %msg)', array(
-          '@path' => $path, 
-          '@remote_host' => $this->server->remote_host, 
+          '@path' => $path,
+          '@remote_host' => $this->server->remote_host,
           '%msg' => join("\n", drush_shell_exec_output())))
       );
     }
   }
-  
+
   function remote_backup($site) {
     $result = $this->remote_execute('@' . $site . ' provision-backup');
-    
+
     if (isset($result['context']['backup_file'])) {
       return $result['context']['backup_file'];
     }
-    
+
     return FALSE;
   }
-  
+
   function fetch_settings($old_url) {
     $settings = array();
-    
+
     $lines = array();
     $lines[] = 'drush_backend_set_result(d()->options)';
-    
+
     // Execute the PHP we wrote in $lines on the remote server.
     $result = $this->remote_execute('@' . $old_url . ' php-eval', array(implode(';', $lines) . ';'));
-    
+
     // If the PHP suceeeds, the result will be in the 'object' key.
     if (isset($result['object']) && is_array($result['object'])) {
       $remote_settings = $result['object'];
@@ -146,10 +146,10 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
         }
       }
     }
-    
+
     return $settings;
   }
-  
+
   function remote_settings_to_copy() {
     $settings = array(
       'profile',
@@ -163,7 +163,6 @@ class provisionService_remote_import_hostmaster extends provisionService_remote_
     }
     return $settings;
   }
-  
 
   /**
    * Implementation of service verify.
