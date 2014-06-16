@@ -171,7 +171,10 @@ class Provision_Service_remote_import_hostmaster extends Provision_Service_remot
     parent::verify_server_cmd();
     // We should try to connect to the remote hostmaster server.
     $result = $this->remote_execute('@hostmaster status');
-    if (!isset($result['object']['Drupal bootstrap']) || ($result['object']['Drupal bootstrap'] != 'Successful')) {
+    if (
+      (!isset($result['object']['Drupal bootstrap']) || ($result['object']['Drupal bootstrap'] != 'Successful')) &&
+      (!isset($result['object']['bootstrap']) || ($result['object']['bootstrap'] != 'Successful'))
+    ) {
       return drush_set_error('REMOTE_SERVER_IS_NOT_MASTER', dt('The specified server is not an Aegir master server.'));
     }
   }
