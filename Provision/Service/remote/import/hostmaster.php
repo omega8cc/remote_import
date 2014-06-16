@@ -56,9 +56,9 @@ class Provision_Service_remote_import_hostmaster extends Provision_Service_remot
     // We need to bootstrap the remote hostmaster.
     $lines[] = 'drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)';
     $lines[] = '$sites = array()';
-    $lines[] = '$result = db_query(\'SELECT hs.nid, n.title FROM {hosting_site} hs INNER JOIN {node} n ON hs.nid = n.nid WHERE hs.status = %d\', HOSTING_SITE_ENABLED)';
-    $lines[] = 'while ($nid = db_fetch_object($result)) {';
-    $lines[] = '  $sites[$nid->nid] = $nid->title';
+    $lines[] = '$result = db_query("SELECT hs.nid, n.title FROM {hosting_site} hs INNER JOIN {node} n ON hs.nid = n.nid WHERE hs.status = :status", array(":status" => HOSTING_SITE_ENABLED))';
+    $lines[] = 'foreach ($result as $site) {';
+    $lines[] = '  $sites[$site->nid] = $site->title';
     $lines[] = '}';
     // Set the $sites array into the backend result, so we can extract it easily
     // later.
@@ -171,7 +171,7 @@ class Provision_Service_remote_import_hostmaster extends Provision_Service_remot
     parent::verify_server_cmd();
     // We should try to connect to the remote hostmaster server.
     $result = $this->remote_execute('@hostmaster status');
-    if (!isset($result['object']['Drupal bootstrap']) || ($result['object']['Drupal bootstrap'] != 'Successful')) {
+    if (!isset($result['object']['bootstrap']) || ($result['object']['bootstrap'] != 'Successful')) {
       return drush_set_error('REMOTE_SERVER_IS_NOT_MASTER', dt('The specified server is not an Aegir master server.'));
     }
   }

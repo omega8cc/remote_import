@@ -83,5 +83,5 @@ function drush_remote_import_provision_remote_import() {
   $new_alias = d()->service('remote_import')->deploy($backup_file, drush_get_option('old_url'), drush_get_option('new_url'), drush_get_option('platform'), drush_get_option('db_server'));
 
   // And finally, we should import this back into Hostmaster.
-  provision_backend_invoke('@hostmaster', 'hosting-import', array($new_alias), array('remote_import_import' => TRUE));
+  provision_backend_invoke('@hostmaster', 'hosting-import', array($new_alias), array('remote_import_import' => TRUE, 'strict' => 0));
 }
