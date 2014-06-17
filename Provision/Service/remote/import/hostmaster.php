@@ -56,9 +56,17 @@ class Provision_Service_remote_import_hostmaster extends Provision_Service_remot
     // We need to bootstrap the remote hostmaster.
     $lines[] = 'drush_bootstrap(DRUSH_BOOTSTRAP_DRUPAL_FULL)';
     $lines[] = '$sites = array()';
-    $lines[] = '$result = db_query("SELECT hs.nid, n.title FROM {hosting_site} hs INNER JOIN {node} n ON hs.nid = n.nid WHERE hs.status = :status", array(":status" => HOSTING_SITE_ENABLED))';
-    $lines[] = 'foreach ($result as $site) {';
-    $lines[] = '  $sites[$site->nid] = $site->title';
+    $lines[] = '$results = db_query("SELECT sn.title as site, pn.title as platform
+                                      FROM {hosting_site} hs
+                                INNER JOIN {node} sn
+                                        ON hs.nid = sn.nid
+                                INNER JOIN {hosting_platform} hp
+                                        ON hs.platform = hp.nid
+                                INNER JOIN {node} pn
+                                        ON hp.nid = pn.nid
+                                     WHERE hs.status = :status", array(":status" => HOSTING_SITE_ENABLED))';
+    $lines[] = 'foreach ($results as $result) {';
+    $lines[] = '  $sites[$result->site] = $result->platform';
     $lines[] = '}';
     // Set the $sites array into the backend result, so we can extract it easily
     // later.
